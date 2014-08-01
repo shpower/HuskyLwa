@@ -97,7 +97,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
                     <gaussianNoise>0.005</gaussianNoise>
                     <alwaysOn>true</alwaysOn>
                     <updateRate>30</updateRate>
-                    <topicName>/mast/scan</topicName>
+                    <topicName>/sick/scan</topicName>
                     <frameName>${name}_base_link</frameName>
                 </plugin>
             </sensor>
