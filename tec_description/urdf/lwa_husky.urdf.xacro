@@ -75,8 +75,8 @@ but the color which shows up in gazebo is defined separately in the gazebo refer
     <xacro:include filename="$(find tec_description)/urdf/components/d46.urdf.xacro" />
 
     <!-- PROPERTY LIST -->
-    <!-- Units in m-kg-s-radians unit system.
-    <!-- xacro also lets you define properties, and refer to them later using the syntax ${property_name} -->
+    <!-- Units in m-kg-s-radians unit system. -->
+    <!-- xacro also lets you define properties, and refer to them later using "${property name}" -->
     <property name="M_PI" value="3.1415926535897931" />
 
     <!-- Main Body-base-->
