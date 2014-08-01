@@ -20,7 +20,7 @@ express permission of Clearpath Robotics.
 #include "gazebo/common/Events.hh"
 
 #include "std_msgs/String.h"
-#include <geometry_msgs/Wrench.h>
+#include <geometry_msgs/WrenchStamped.h>
 #include "control_msgs/JointTrajectoryControllerState.h"
 #include "cob_srvs/Trigger.h"
 #include "cob_srvs/SetOperationMode.h"

@@ -108,7 +108,7 @@ void LWAPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
     joint_state_pub_ = rosnode_->advertise<sensor_msgs::JointState>("/joint_states", 1);
     opmode_pub_ = rosnode_->advertise<std_msgs::String>("current_operationmode", 1000);
     trajectory_state_pub_ = rosnode_->advertise<control_msgs::JointTrajectoryControllerState>("state", 1000);
-    force_torque_pub_ = rosnode_->advertise<geometry_msgs::Wrench>("/ftm/force_values", 1);
+    force_torque_pub_ = rosnode_->advertise<geometry_msgs::WrenchStamped>("/ftm/force_values", 1);
 
        
     // for cob_trajectory_controller
@@ -150,13 +150,17 @@ void LWAPlugin::UpdateChild()
 
     // simulate force-torque sensor
     gazebo::physics::JointWrench force_torque = joints_[6]->GetForceTorque(0u);
-    geometry_msgs::Wrench force_torque_msg;
-    force_torque_msg.force.x = force_torque.body2Force.x;
-    force_torque_msg.force.y = force_torque.body2Force.y;
-    force_torque_msg.force.z = force_torque.body2Force.z;
-    force_torque_msg.torque.x = force_torque.body2Torque.x;
-    force_torque_msg.torque.y = force_torque.body2Torque.y;
-    force_torque_msg.torque.z = force_torque.body2Torque.z;
+    geometry_msgs::WrenchStamped force_torque_msg;
+    force_torque_msg.header.stamp.sec = time_now.sec;
+    force_torque_msg.header.stamp.nsec = time_now.nsec;
+    force_torque_msg.header.frame_id = "arm_gripper_link";
+    
+    force_torque_msg.wrench.force.x = force_torque.body2Force.x;
+    force_torque_msg.wrench.force.y = force_torque.body2Force.y;
+    force_torque_msg.wrench.force.z = force_torque.body2Force.z;
+    force_torque_msg.wrench.torque.x = force_torque.body2Torque.x;
+    force_torque_msg.wrench.torque.y = force_torque.body2Torque.y;
+    force_torque_msg.wrench.torque.z = force_torque.body2Torque.z;
     force_torque_pub_.publish(force_torque_msg);
     
     

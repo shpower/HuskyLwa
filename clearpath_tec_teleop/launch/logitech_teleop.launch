@@ -2,7 +2,7 @@
 <!--
 Software License Agreement (BSD)
 
-\file      simulation.launch
+\file      logitech_teleop.launch
 \authors   Arnold <akalmbach@clearpathrobotics.com>
 \copyright Copyright (c) 2014, Clearpath Robotics, Inc., All rights reserved.
 
@@ -24,45 +24,20 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCL
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 <launch>
-  <!-- These parameters can be specified on the command line with the sytax param:=value 
-       For more information on roslaunch XML syntax see http://wiki.ros.org/roslaunch/XML -->
-  <arg name="use_arm_controller" default="false" />
-  <arg name="use_joystick_controller" default="false" />
-  <arg name="use_localization" default="false" />
+
+
+  <!-- Husky teleop systems -->
+  <include file="$(find husky_teleop)/launch/teleop.launch">
+    <arg name="drive_speed" value="1.0" />
+    <arg name="turn_speed" value="1.0" />
+    <arg name="cmd_topic" value="husky/cmd_vel_unsafe" />
+  </include>
+
+  <node name="logitech_teleop" pkg="clearpath_tec_teleop" type="logitech_teleop" output="screen"/>
   
-  <arg name="x_start" default="0" />
-  <arg name="y_start" default="0" />
-  <arg name="z_start" default="0" />
-
-  <!-- Start Gazebo and load an empty world -->
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="use_sim_time" value="true"/>
-    <arg name="debug" value="false"/>
-  </include>
+  <node name="ptu_teleop" pkg="clearpath_tec_teleop" type="ptu_teleop.py" output="screen"/>
 
 
-  <!-- Spawn the robot in Gazebo -->
-  <include file="$(find tec_description)/launch/base.urdf.gazebo.launch">
-    <arg name="x_start" value="$(arg x_start)" />
-    <arg name="y_start" value="$(arg y_start)" />
-    <arg name="z_start" value="$(arg z_start)" />
-  </include>
-
- 
-  <!-- Start the arm path planning and path following nodes
-       as well as RVIZ with the MotionPlanning plugin preconfigured --> 
-  <group if="$(arg use_arm_controller)">
-    <include file="$(find clearpath_tec_bringup)/launch/arm_controller.launch" />
-    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find clearpath_tec_bringup)/config/arm_control.rviz" />
-  </group>
-
-  <!-- Start the joystick control nodes -->
-  <group if="$(arg use_joystick_controller)">
-    <include file="$(find clearpath_tec_teleop)/launch/logitech_teleop.launch" />
-  </group>
-
-  <group if="$(arg use_localization)">
-    <include file="$(find clearpath_tec_bringup)/launch/husky-core.d/ekf.launch" />
-  </group>
+  <!-- Combined Husky, Arm and Gripper Joystick Teleop-->
 
 </launch>
