@@ -25,7 +25,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 <launch>
   <group ns="arm_controller">
     <rosparam file="$(find clearpath_tec_moveit)/config/lwa_trajectory_params.yaml" command="load"/>
-    <node name="cob_trajectory_controller" pkg="cob_trajectory_controller" type="cob_trajectory_controller" output="screen"/>
+    <node name="cob_trajectory_controller" pkg="cob_trajectory_controller" type="cob_trajectory_controller" output="screen">
+      <remap from="command_vel" to="cmd_vel" />
+    </node>
   </group>
 
   <include file="$(find clearpath_tec_moveit)/launch/move_group.launch" />

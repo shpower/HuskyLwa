@@ -41,7 +41,7 @@ JoystickTeleop::JoystickTeleop (ros::NodeHandle &n): node_(n)
     arm_enabled = false;
     sample_command.velocities.resize(NUM_JOINTS);
 
-    joint_vel_pub = node_.advertise<brics_actuator::JointVelocities>("arm_controller/command_vel",1000);
+    joint_vel_pub = node_.advertise<brics_actuator::JointVelocities>("arm_controller/cmd_vel",1000);
     arm_light_pub = node_.advertise<std_msgs::Bool>("/husky_01/arm_light",1);
     mast_light_pub = node_.advertise<std_msgs::Bool>("/husky_01/mast_light",1);
     joy_sub = node_.subscribe<sensor_msgs::Joy>("joy", 1000, &JoystickTeleop::joystickCallback,this);
