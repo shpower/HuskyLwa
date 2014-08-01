@@ -1,0 +1,276 @@
+<?xml version="1.0"?>
+<!--
+Software License Agreement (BSD)
+
+\file      lwa_husky.urdf.xacro
+\authors   Arnold <akalmbach@clearpathrobotics.com>
+\copyright Copyright (c) 2014, Clearpath Robotics, Inc., All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that
+the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions and the
+   following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+   following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of Clearpath Robotics nor the names of its contributors may be used to endorse or promote
+   products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WAR-
+RANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, IN-
+DIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro"
+    name="lwa_husky" >
+
+    <!-- utils-->
+    <xacro:include filename="$(find tec_description)/urdf/utils/wheel.urdf.xacro" />
+    <xacro:include filename="$(find tec_description)/urdf/utils/materials.urdf.xacro" />
+    <xacro:include filename="$(find tec_description)/urdf/utils/parts.urdf.xacro" />
+
+    <!-- sensors -->
+    <xacro:include filename="$(find pr2_description)/urdf/sensors/microstrain_3dmgx2_imu.urdf.xacro" />
+    <xacro:include filename="$(find tec_description)/urdf/components/kinect.urdf.xacro" />
+    <xacro:include filename="$(find tec_description)/urdf/components/lms151.urdf.xacro" />
+    <xacro:include filename="$(find tec_description)/urdf/components/firefly.urdf.xacro" />
+
+    <!-- schunk lwa (light weight arm)-->
+    <xacro:include filename="$(find tec_description)/urdf/lwa/lwa.urdf.xacro" />
+    <xacro:include filename="$(find tec_description)/urdf/lwa/lwa.gazebo.xacro" />
+    <xacro:include filename="$(find tec_description)/calibration/calibration.urdf.xacro" />
+
+    <!-- PTU -->
+    <xacro:include filename="$(find tec_description)/urdf/components/d46.urdf.xacro" />
+
+    <!-- PROPERTY LIST -->
+    <!--All units in m-kg-s-radians unit system -->
+    <property name="M_PI" value="3.1415926535897931" />
+
+    <!-- Main Body-base-->
+    <!-- Location of com : center of mass -->
+    <property name="base_x_com" value="-0.08748000" />
+    <property name="base_y_com" value="-0.00085000" />
+    <property name="base_z_com" value="0.09947000" />
+
+    <!-- Size of the base-->
+    <property name="base_x_size" value="0.98740000" /> 
+    <property name="base_y_size" value="0.57090000" /> 
+    <property name="base_z_size" value="0.24750000" />
+
+    <!--Weight of the base-->
+    <property name="base_mass" value="33.45489000" /> <!-- in kg-->
+
+    <!--Inertial values for the base at center of mass, aligned with coordinate system. Units are kg*m^2-->
+    <property name="base_ixx_com_cs" value="0.60216370" />
+    <property name="base_ixy_com_cs" value="-0.02364198" />
+    <property name="base_ixz_com_cs" value="-0.11972132" />
+    <property name="base_iyy_com_cs" value="1.73859574" />
+    <property name="base_iyz_com_cs" value="-0.00154437" />
+    <property name="base_izz_com_cs" value="2.02955229" />
+    
+    <link name="base_footprint">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+    </link>
+
+    <gazebo reference="base_footprint">
+        <turnGravityOff>false</turnGravityOff>
+    </gazebo>
+
+    <joint name="base_footprint_joint" type="fixed">
+		<origin xyz="0 0 ${wheel_x_size/2 - base_z_origin_to_wheel_origin}" rpy="0 0 0" />
+        <parent link="base_footprint"/>
+        <child link="base_link" />
+    </joint>
+
+    <!-- BASE-LINK -->
+        <link name="base_link">
+            <inertial>
+                <mass value="${base_mass}" />
+                <!--This is the pose of the inertial reference frame, relative to the link reference frame. The origin of the inertial reference frame needs to be at the center of gravity. The axes of the inertial reference frame do not need to be aligned with the principal axes of the inertia.-->
+                <origin xyz="${base_x_com} ${base_y_com} ${base_z_com}" />
+                <!--The 3x3 rotational inertia matrix. Because the rotational inertia matrix is symmetric, only 6 above-diagonal elements of this matrix are specified here, using the attributes ixx, ixy, ixz, iyy, iyz, izz.-->
+                <inertia ixx="${base_ixx_com_cs}" ixy="${base_ixy_com_cs}" ixz="${base_ixz_com_cs}"
+                    iyy="${base_iyy_com_cs}" iyz="${base_iyz_com_cs}" izz="${base_izz_com_cs}" /> 
+            </inertial>
+            
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <mesh filename="package://husky_description/meshes/base_link.stl" />
+                </geometry>
+                <material name="Black" />
+            </visual>
+        
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <mesh filename="package://husky_description/meshes/base_link.stl" />
+                </geometry>
+            </collision>     
+        </link>
+        <gazebo reference="base_link">
+            <material>Gazebo/FlatBlack</material>
+            <turnGravityOff>false</turnGravityOff>
+        </gazebo>
+    <!-- /BASE-LINK -->
+    
+    <!-- WHEELS -->
+        <tec_wheel fb="back" lr="left" parent="base_link" translateX="-1" translateY="1" flipY="-1"/>
+        <tec_wheel fb="back" lr="right" parent="base_link" translateX="-1" translateY="-1" flipY="-1"/>
+        <tec_wheel fb="front" lr="left" parent="base_link" translateX="1" translateY="1" flipY="-1"/>
+        <tec_wheel fb="front" lr="right" parent="base_link" translateX="1" translateY="-1" flipY="-1"/>
+    <!-- /WHEELS -->
+    
+    
+    <!-- DECORATIONS -->
+        <!-- Top Plate -->
+        <tec_part parent="base_footprint" name="top_plate" visual="top_plate" collision="top_plate" 
+              colour="Yellow"
+              translateX="0.0" translateY="0.0" translateZ="${wheel_x_size/2 - base_z_origin_to_wheel_origin}" 
+              rotateX="0.0" rotateY="0.0" rotateZ="0.0"/>
+        <gazebo reference="base_footprint_top_plate_part">
+            <material>Gazebo/Yellow</material>
+        </gazebo>
+
+        <!-- User Rail -->
+        <tec_part parent="base_footprint" name="user_rail" visual="user_rail" collision="user_rail"
+              colour="DarkGray"
+              translateX="0.272" translateY="0.0" translateZ="${0.245 + wheel_x_size/2 - base_z_origin_to_wheel_origin}" 
+              rotateX="0.0" rotateY="0.0" rotateZ="0.0"/>
+        <gazebo reference="base_footprint_user_rail_part">
+            <material>Gazebo/Grey</material>
+        </gazebo>
+
+        <!-- Bumpers -->
+        <tec_part parent="base_footprint" name="front_bumper" visual="bumper" collision="bumper"
+              colour="DarkGray"
+              translateX="0.480" translateY="0.0" translateZ="${0.091 + wheel_x_size/2 - base_z_origin_to_wheel_origin}" 
+              rotateX="0.0" rotateY="0.0" rotateZ="0.0"/>
+        <gazebo reference="base_footprint_front_bumper_part">
+            <material>Gazebo/FlatBlack</material>
+        </gazebo>
+        <tec_part parent="base_footprint" name="rear_bumper" visual="bumper" collision="bumper"
+              colour="DarkGray"
+              translateX="-0.48" translateY="0.0" translateZ="${0.091 + wheel_x_size/2 - base_z_origin_to_wheel_origin}" 
+              rotateX="0.0" rotateY="0.0" rotateZ="3.14"/>
+        <gazebo reference="base_footprint_rear_bumper_part">
+            <material>Gazebo/FlatBlack</material>
+        </gazebo>
+    <!-- /DECORATIONS -->
+        
+
+    <!-- ARM -->
+        <!-- Note that the plugins and sensors are started from gazebo reference tags
+             at the bottom of this file, after the entire model has been loaded -->
+        <xacro:schunk_lwa name="arm" parent="base_link">
+            <origin xyz="0.3 0 0.1" rpy="${M_PI} 0 0" />
+        </xacro:schunk_lwa>
+    <!-- /ARM -->
+
+    <!-- MAST AND SENSORS -->
+        <!-- Mast -->
+        <xacro:tec_part parent="base_footprint" name="sensor_mast" visual="sensor_mast" collision="sensor_mast_simple"
+            colour="DarkGray"
+            translateX="0" translateY="0.0" translateZ="${wheel_x_size/2}" 
+            rotateX="0" rotateY="0.0" rotateZ="0"/>
+        <gazebo reference="base_link_sensor_mast_part">
+            <material>Gazebo/FlatBlack</material>
+        </gazebo>
+
+        <!-- Pan Tilt Unit -->
+        <xacro:ptu_d46 name="flir_ptu" />
+        <joint name="ptu_base_to_base" type="fixed">
+            <parent link="base_link"/>
+            <child link="flir_ptu_base_link"/>
+            <origin xyz="-0.335 0 0.94" rpy="0 ${M_PI/2} 0"/>
+        </joint>
+        
+        <!-- Kinect -->
+        <xacro:sensor_kinect parent="flir_ptu_mount_link" name="kinect" >
+            <origin xyz="0 0 0" rpy="0 0 0" />
+        </xacro:sensor_kinect>
+
+        <!-- Lidar Mounting Bracket -->
+        <tec_part parent="base_footprint_front_bumper_part" name="sick_bracket" visual="lidar_mount" collision="lidar_mount"
+            colour="DarkGray"
+            translateX="-0.075" translateY="0" translateZ="0" 
+            rotateX="0" rotateY="0.0" rotateZ="0"/>
+        <gazebo reference="flir_ptu_mount_link_sick_bracket_part">
+            <material>Gazebo/FlatBlack</material>
+        </gazebo>
+
+        <!-- Front Lidar -->
+        <xacro:sensor_lms151 parent="base_footprint_front_bumper_part_sick_bracket_part" name="sick">
+            <origin xyz="0.055 0.0 0.14" rpy="0 0 0" />
+        </xacro:sensor_lms151>
+        
+        <!-- Mast Camera -->
+        <xacro:sensor_firefly parent="base_link" name="mast">
+            <origin xyz="-0.23 0.0 0.93" rpy="0 0.4712 0" />
+        </xacro:sensor_firefly>
+
+        <!-- IMU -->
+	<gazebo>
+	  <plugin name="imu_controller" filename="libgazebo_ros_imu.so">
+		<alwaysOn>true</alwaysOn>
+		<updateRate>50.0</updateRate> 
+		<bodyName>base_link</bodyName>
+		<topicName>imu/data</topicName>
+		<gaussianNoise>2.89e-08</gaussianNoise>
+	  </plugin>
+	</gazebo>
+
+        <!-- GPS -->
+        <gazebo>
+            <plugin name="gps_controller" filename="libgazebo_ros_p3d.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>30.0</updateRate>
+            <bodyName>base_link</bodyName>
+            <topicName>gps/fix</topicName>
+            <gaussianNoise>0.05</gaussianNoise>
+            </plugin>
+        </gazebo>
+        
+        <!-- Arm Lidar -->
+        <xacro:sensor_hokuyo parent="arm_gripper" name="hokuyo">
+            <origin xyz="-0.06 0 0.105" rpy="0 0 0"/>
+        </xacro:sensor_hokuyo>
+
+        <!-- Arm Camera -->
+        <xacro:sensor_firefly parent="arm_gripper" name="arm">
+            <origin xyz="0.02 0 0.09" rpy="0 0 0"/>
+        </xacro:sensor_firefly>
+    <!-- /MAST AND SENSORS -->
+
+    <!-- CUSTOM PLUGINS -->
+        <!-- Base plugin -->
+        <gazebo>
+            <plugin name="tec_husky_gazebo_plugin" filename="libtec_husky_gazebo_plugin.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>50.0</updateRate>
+            <backLeftJoint>joint_back_left_wheel</backLeftJoint>
+            <backRightJoint>joint_back_right_wheel</backRightJoint>
+            <frontLeftJoint>joint_front_left_wheel</frontLeftJoint>
+            <frontRightJoint>joint_front_right_wheel</frontRightJoint>
+            <panJoint>flir_ptu_pan</panJoint>
+            <tiltJoint>flir_ptu_tilt</tiltJoint>
+            <wheelSeparation>${base_y_size}</wheelSeparation>
+            <wheelDiameter>${wheel_x_size}</wheelDiameter>
+            <torque>35</torque>
+            </plugin>
+        </gazebo>
+        
+        <!-- Arm and PTU plugin -->
+        <xacro:schunk_lwa_gazebo name="arm" />
+    <!-- CUSTOM PLUGINS -->
+      
+   
+</robot>

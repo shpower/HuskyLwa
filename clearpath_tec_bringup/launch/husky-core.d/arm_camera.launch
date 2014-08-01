@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<!--
+Software License Agreement (BSD)
+
+\file      arm_camera.launch
+\authors   Arnold <akalmbach@clearpathrobotics.com>
+\copyright Copyright (c) 2014, Clearpath Robotics, Inc., All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that
+the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions and the
+   following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+   following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of Clearpath Robotics nor the names of its contributors may be used to endorse or promote
+   products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WAR-
+RANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, IN-
+DIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<launch>
+<group ns="arm">
+  <param name="/camera/image_color/compressed/jpeg_quality" value="60"/>
+
+  <!-- nodelet manager process -->
+  <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager"
+        args="manager" >
+        <rosparam file="$(find clearpath_tec_bringup)/config/arm_ffmv.yaml"/>
+  </node>
+
+
+  <!-- camera driver nodelet -->
+  <node pkg="nodelet" type="nodelet" name="camera1394_nodelet"
+        args="load camera1394/driver camera_nodelet_manager">
+        <rosparam file="$(find clearpath_tec_bringup)/config/arm_ffmv.yaml" />
+  </node>
+
+  <!-- decimate -->
+  <node pkg="nodelet" type="nodelet" name="image_proc_rectify"
+        args="load image_proc/crop_decimate camera_nodelet_manager">
+    <remap from="camera_out/image_raw" to="camera/image_dec" />
+    <param name="decimation_x" value="4"/>
+    <param name="decimation_y" value="4"/>
+  </node>
+    
+  <!-- dewarp (broken) -->
+<!--
+  <node pkg="nodelet" type="nodelet" name="image_proc_rectify"
+        args="load image_proc/rectify camera_nodelet_manager">
+    <remap from="image_mono" to="camera/image_raw" />
+    <remap from="image_rect" to="camera/image_rect" />
+  </node>
+-->
+
+  <!-- Bayer color decoding -->
+  <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
+        args="load image_proc/debayer camera_nodelet_manager">
+    <param name="bayer_pattern" value="rggb" />
+    <param name="bayer_method" value="" />
+    <remap from="image_color" to="camera/image_color" />
+    <remap from="image_mono" to="camera/image_mono" />
+    <remap from="image_raw" to="camera/image_dec" />
+  </node>
+
+</group>
+
+</launch>

@@ -1,0 +1,408 @@
+<?xml version="1.0"?>
+<!--
+Software License Agreement (BSD)
+
+\file      lwa.urdf.xacro
+\authors   Arnold <akalmbach@clearpathrobotics.com>
+\copyright Copyright (c) 2014, Clearpath Robotics, Inc., All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that
+the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions and the
+   following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+   following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of Clearpath Robotics nor the names of its contributors may be used to endorse or promote
+   products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WAR-
+RANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, IN-
+DIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<xacro:include filename="$(find tec_description)/urdf/lwa/lwa.gazebo.xacro" />
+    <xacro:include filename="$(find tec_description)/urdf/components/hokuyo.urdf.xacro" />
+    <xacro:include filename="$(find tec_description)/urdf/components/firefly.urdf.xacro" />
+
+    <property name="joint_1_upper_limit" value="3.13" />
+    <property name="joint_1_lower_limit" value="-3.13" />
+    <property name="joint_2_upper_limit" value="1.56" />
+    <property name="joint_2_lower_limit" value="-1.56" />
+    <property name="joint_3_upper_limit" value="3.13" />
+    <property name="joint_3_lower_limit" value="-3.13" />
+    <property name="joint_4_upper_limit" value="2.12" />
+    <property name="joint_4_lower_limit" value="-2.12" />
+    <property name="joint_5_upper_limit" value="3.13" />
+    <property name="joint_5_lower_limit" value="-3.13" />
+    <property name="joint_6_upper_limit" value="1.57" />
+    <property name="joint_6_lower_limit" value="-1.8" />
+    <property name="joint_7_upper_limit" value="2.95" />
+    <property name="joint_7_lower_limit" value="-2.95" />
+   
+    <property name="soft_range_eps" value="0.05" />
+    
+    <xacro:macro name="schunk_lwa" params="parent name *origin">
+
+		<!-- joint between base_link and arm_0_link -->
+		<joint name="${name}_0_joint" type="fixed" >
+			<insert_block name="origin" />
+			<parent link="${parent}" />
+			<child link="${name}_0_link" />
+		</joint>
+
+		<link name="${name}_0_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0"/>
+				<mass value="1.0"/>
+				<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+			</inertial>
+
+			<visual>
+				<origin xyz="0 0 0.004" rpy="0 0 0" />
+				<geometry>
+					<cylinder radius="0.045" length="0.08"/>
+				</geometry>
+				<material name="Gray" />
+			</visual>
+
+			<collision>
+				<origin xyz="0 0 0.005" rpy="0 0 0" />
+				<geometry>
+					<box size="0.01 0.01 0.01"/>
+				</geometry>
+			</collision>
+		</link>
+
+		<!-- joint between arm_0_link and arm_1_link -->
+		<joint name="${name}_1_joint" type="revolute">
+			<origin xyz="0 0 -0.250" rpy="0 0 0"/>
+			<parent link="${name}_0_link"/>
+			<child link="${name}_1_link"/>
+			<axis xyz="0 0 1"/>
+			<calibration rising="${arm_1_ref}"/>
+			<dynamics damping="10" />
+			<limit effort="1000" velocity="2.0" lower="${joint_1_lower_limit}" upper="${joint_1_upper_limit}"/>
+			<safety_controller k_position="20" k_velocity="50"
+                soft_lower_limit="${joint_1_lower_limit + soft_range_eps}"
+                soft_upper_limit="${joint_1_upper_limit - soft_range_eps}"
+            />
+		</joint>
+
+		<link name="${name}_1_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<mass value="5.9907"/>
+				<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+			</inertial>
+			
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa/lwa1.stl" />
+				</geometry>
+				<material name="DarkGray" />
+			</visual>
+			
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa/lwa1.stl" />
+				</geometry>
+			</collision>
+		</link>
+
+        <!-- joint between arm_1_link and arm_2_link -->	
+		<joint name="${name}_2_joint" type="revolute">
+			<origin xyz="0 0 0" rpy="1.5708 0 0"/>
+			<parent link="${name}_1_link"/>
+			<child link="${name}_2_link"/>
+			<axis xyz="0 0 1"/>
+			<calibration rising="${arm_2_ref}"/>
+			<dynamics damping="10" />
+			<limit effort="1000" velocity="2.0" lower="${joint_2_lower_limit}" upper="${joint_2_upper_limit}"/>
+			<safety_controller k_position="20" k_velocity="50"
+                soft_lower_limit="${joint_2_lower_limit + soft_range_eps}"
+                soft_upper_limit="${joint_2_upper_limit - soft_range_eps}"
+            />
+		</joint>
+
+		<link name="${name}_2_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0"/>
+				<mass value="5.734939"/>
+				<inertia ixx="0.03" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.03" />
+			</inertial>
+			
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa/lwa2.stl" />
+				</geometry>
+				<material name="Gray" />
+			</visual>
+			
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa/lwa2.stl"/>
+				</geometry>
+			</collision>
+		</link>
+	<!-- joint between arm_2_link and arm_3_link -->	
+		<joint name="${name}_3_joint" type="revolute">
+			<origin xyz="0 -0.408 0" rpy="-1.5708 0 0"/>
+			<parent link="${name}_2_link"/>
+			<child link="${name}_3_link"/>
+			<axis xyz="0 0 1"/>
+			<calibration rising="${arm_3_ref}"/>
+			<dynamics damping="5" />
+			<limit effort="1000" velocity="2.0" lower="${joint_3_lower_limit}" upper="${joint_3_upper_limit}"/>
+			<safety_controller k_position="20" k_velocity="50"
+                soft_lower_limit="${joint_3_lower_limit + soft_range_eps}"
+                soft_upper_limit="${joint_3_upper_limit - soft_range_eps}"
+            />
+		</joint>
+
+		<link name="${name}_3_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0"/>
+				<mass value="4.214668"/>
+				<inertia ixx="0.03" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.03" />
+			</inertial>
+			
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa/lwa3.stl" />
+				</geometry>
+				<material name="DarkGray" />
+			</visual>
+			
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa/lwa3.stl"/>
+				</geometry>
+			</collision>
+		</link>	
+
+		<!-- joint between arm_3_link and arm_4_link -->
+		<joint name="${name}_4_joint" type="revolute">
+			<origin xyz="0 0 0" rpy="1.5708 0 0" />
+			<parent link="${name}_3_link"/>
+			<child link="${name}_4_link"/>
+			<axis xyz="0 0 1" />
+			<calibration rising="${arm_4_ref}"/>
+			<dynamics damping="5" />
+			<limit effort="1000" velocity="2.0" lower="${joint_4_lower_limit}" upper="${joint_4_upper_limit}"/>
+			<safety_controller k_position="20" k_velocity="50"
+                soft_lower_limit="${joint_4_lower_limit + soft_range_eps}"
+                soft_upper_limit="${joint_4_upper_limit - soft_range_eps}"
+            />
+		</joint>
+
+		<link name="${name}_4_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0"/>
+				<mass value="3.669819"/>
+				<inertia ixx="0.03" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.03" />
+			</inertial>
+			
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa/lwa4.stl" />
+				</geometry>
+				<material name="Gray" />
+			</visual>
+			
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa/lwa4.stl"/>
+				</geometry>
+			</collision>
+		</link>
+
+		<!-- joint between arm_4_link and arm_5_link -->
+		<joint name="${name}_5_joint" type="revolute">
+			<origin xyz="0 -0.3165 0" rpy="-1.5708 0 0" />
+			<parent link="${name}_4_link"/>
+			<child link="${name}_5_link"/>
+			<axis xyz="0 0 1" />
+			<calibration rising="${arm_5_ref}"/>
+			<dynamics damping="5" />
+			<limit effort="1000" velocity="2.0" lower="${joint_5_lower_limit}" upper="${joint_5_upper_limit}"/>
+			<safety_controller k_position="20" k_velocity="50"
+                soft_lower_limit="${joint_5_lower_limit + soft_range_eps}"
+                soft_upper_limit="${joint_5_upper_limit - soft_range_eps}"
+            />
+		</joint>
+
+		<link name="${name}_5_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0"/>
+				<mass value="2.313272"/>
+				<inertia ixx="0.03" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.03" />
+			</inertial>
+			
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa/lwa5.stl" />
+				</geometry>
+				<material name="DarkGray" />
+			</visual>
+			
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa/lwa5.stl"/>
+				</geometry>
+			</collision>
+		</link>
+
+
+	<!-- joint between arm_5_link and arm_6_link -->
+		<joint name="${name}_6_joint" type="revolute">
+			<origin xyz="0 0.005 0" rpy="-1.5708 0 0" />
+			<parent link="${name}_5_link"/>
+			<child link="${name}_6_link"/>
+			<axis xyz="0 0 1" />
+			<calibration rising="${arm_6_ref}"/>
+			<dynamics damping="5" />
+			<limit effort="1000" velocity="2.0" lower="${joint_6_lower_limit}" upper="${joint_6_upper_limit}"/>
+			<safety_controller k_position="20" k_velocity="50"
+                soft_lower_limit="${joint_6_lower_limit + soft_range_eps}"
+                soft_upper_limit="${joint_6_upper_limit - soft_range_eps}"
+            />
+		</joint>
+
+		<link name="${name}_6_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0"/>
+				<mass value="0.807"/>
+				<inertia ixx="0.03" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.03" />
+			</inertial>
+			
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa4p/arm_5_link.stl" />
+				</geometry>
+				<material name="Gray" />
+			</visual>
+			
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa4p/arm_5_link.stl"/>
+				</geometry>
+			</collision>
+		</link>
+
+		<!-- joint between arm_6_link and arm_7_link -->
+		<joint name="${name}_7_joint" type="revolute">
+			<origin xyz="0 0 0" rpy="-1.5708 0 0" />
+			<parent link="${name}_6_link"/>
+			<child link="${name}_7_link"/>
+			<axis xyz="0 0 1" />
+			<calibration rising="${arm_7_ref}"/>
+			<dynamics damping="5" />
+			<limit effort="1000" velocity="2.0" lower="${joint_7_lower_limit}" upper="${joint_7_upper_limit}"/>
+			<safety_controller k_position="20" k_velocity="50"
+                soft_lower_limit="${joint_7_lower_limit + soft_range_eps}"
+                soft_upper_limit="${joint_7_upper_limit - soft_range_eps}"
+            />
+		</joint>
+
+		<link name="${name}_7_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0"/>
+				<mass value="0.819"/>
+				<inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+			</inertial>
+			
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa4p/arm_6_link.stl" />
+				</geometry>
+				<material name="DarkGray" />
+			</visual>
+			
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://schunk_description/meshes/lwa4p/arm_6_link.stl"/>
+				</geometry>
+			</collision>
+		</link>
+        
+                
+    <joint name="${name}_gripper_joint" type="fixed">
+        <origin xyz="0 0 0.13" rpy="0 ${-M_PI/2} 0" />
+        <parent link="${name}_7_link"/>
+        <child link="${name}_gripper"/>
+    </joint>
+       
+    <link name="${name}_gripper">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="2.3"/>
+            <inertia ixx="0.03" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.03" />
+        </inertial>
+        
+        <visual>
+            <origin xyz="0 0 0" rpy="0 ${M_PI/2} 0" />
+            <geometry>
+                <cylinder radius="0.0375" length="0.11"/>
+            </geometry>
+            <material name="Gray" />
+        </visual>
+        <visual>
+            <origin xyz="-0.02 0 0.06" rpy="0 0 0" />
+            <geometry>
+                <box size="0.11 0.1 0.04" />
+            </geometry>
+            <material name="Gray" />
+        </visual>
+        <visual>
+            <origin xyz="0.12 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.14 0.14 0.14" />
+            </geometry>
+            <material name="Gray" />
+        </visual>
+        
+        <collision>
+            <origin xyz="0 0 0" rpy="0 ${M_PI/2} 0" />
+            <geometry>
+                <cylinder radius="0.04" length="0.11"/>
+            </geometry>
+            <material name="Gray" />
+        </collision>
+        <collision>
+            <origin xyz="-0.02 0 0.06" rpy="0 0 0" />
+            <geometry>
+                <box size="0.11 0.1 0.04" />
+            </geometry>
+            <material name="Gray" />
+        </collision>
+        <collision>
+            <origin xyz="0.12 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.14 0.14 0.14" />
+            </geometry>
+            <material name="Gray" />
+        </collision>
+    </link>
+
+	</xacro:macro>
+
+</robot>
