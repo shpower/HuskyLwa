@@ -1,0 +1,8 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: tec_description
+    relative_path: urdf/lwa_husky.urdf
+  SRDF:
+    relative_path: config/lwa_husky.srdf
+  CONFIG:
+    generated_timestamp: 1405432121

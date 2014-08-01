@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!--
+Software License Agreement (BSD)
+
+\file      simulation.launch
+\authors   Arnold <akalmbach@clearpathrobotics.com>
+\copyright Copyright (c) 2014, Clearpath Robotics, Inc., All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that
+the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions and the
+   following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+   following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of Clearpath Robotics nor the names of its contributors may be used to endorse or promote
+   products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WAR-
+RANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, IN-
+DIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<launch>
+  <!-- These parameters can be specified on the command line with the sytax param:=value 
+       For more information on roslaunch XML syntax see http://wiki.ros.org/roslaunch/XML -->
+  <arg name="use_arm_controller" default="false" />
+  <arg name="use_joystick_controller" default="false" />
+  <arg name="x_start" default="0" />
+  <arg name="y_start" default="0" />
+  <arg name="z_start" default="0" />
+
+  <!-- Start Gazebo and load an empty world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="use_sim_time" value="true"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+
+  <!-- Spawn the robot in Gazebo -->
+  <include file="$(find tec_description)/launch/base.urdf.gazebo.launch">
+    <arg name="x_start" value="$(arg x_start)" />
+    <arg name="y_start" value="$(arg y_start)" />
+    <arg name="z_start" value="$(arg z_start)" />
+  </include>
+
+ 
+  <!-- Start the arm path planning and path following nodes
+       as well as RVIZ with the MotionPlanning plugin preconfigured --> 
+  <group if="$(arg use_arm_controller)">
+    <include file="$(find clearpath_tec_bringup)/launch/arm_controller.launch" />
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find clearpath_tec_bringup)/config/arm_control.rviz" />
+  </group>
+
+  <!-- Start the joystick control nodes -->
+  <group if="$(arg use_joystick_controller)">
+    <include file="$(find clearpath_tec_teleop)/launch/logitech_teleop.launch" />
+  </group>
+
+</launch>
