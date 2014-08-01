@@ -47,6 +47,7 @@ target_link_libraries(lwa_gazebo_plugin
   ${GAZEBO_LIBRARIES}
 )
 
+
 install(
   DIRECTORY launch worlds meshes calibration
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}

@@ -32,7 +32,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
     <xacro:include filename="$(find tec_description)/urdf/utils/parts.urdf.xacro" />
 
     <!-- sensors -->
-    <xacro:include filename="$(find pr2_description)/urdf/sensors/microstrain_3dmgx2_imu.urdf.xacro" />
     <xacro:include filename="$(find tec_description)/urdf/components/kinect.urdf.xacro" />
     <xacro:include filename="$(find tec_description)/urdf/components/lms151.urdf.xacro" />
     <xacro:include filename="$(find tec_description)/urdf/components/firefly.urdf.xacro" />
@@ -85,7 +84,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
     </gazebo>
 
     <joint name="base_footprint_joint" type="fixed">
-		<origin xyz="0 0 ${wheel_x_size/2 - base_z_origin_to_wheel_origin}" rpy="0 0 0" />
+        <origin xyz="0 0 ${wheel_x_size/2 - base_z_origin_to_wheel_origin}" rpy="0 0 0" />
         <parent link="base_footprint"/>
         <child link="base_link" />
     </joint>
@@ -150,9 +149,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
         </gazebo>
 
         <!-- Bumpers -->
-        <tec_part parent="base_footprint" name="front_bumper" visual="bumper" collision="bumper"
+        <tec_part parent="base_footprint" name="front_bumper" visual="front_bumper" collision="front_bumper"
               colour="DarkGray"
-              translateX="0.480" translateY="0.0" translateZ="${0.091 + wheel_x_size/2 - base_z_origin_to_wheel_origin}" 
+              translateX="0.530" translateY="0.0" translateZ="${0.091 + wheel_x_size/2 - base_z_origin_to_wheel_origin}" 
               rotateX="0.0" rotateY="0.0" rotateZ="0.0"/>
         <gazebo reference="base_footprint_front_bumper_part">
             <material>Gazebo/FlatBlack</material>
@@ -201,7 +200,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
         <!-- Lidar Mounting Bracket -->
         <tec_part parent="base_footprint_front_bumper_part" name="sick_bracket" visual="lidar_mount" collision="lidar_mount"
             colour="DarkGray"
-            translateX="-0.075" translateY="0" translateZ="0" 
+            translateX="-0.12" translateY="0" translateZ="0" 
             rotateX="0" rotateY="0.0" rotateZ="0"/>
         <gazebo reference="flir_ptu_mount_link_sick_bracket_part">
             <material>Gazebo/FlatBlack</material>
@@ -218,30 +217,51 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
         </xacro:sensor_firefly>
 
         <!-- IMU -->
-	<gazebo>
-	  <plugin name="imu_controller" filename="libgazebo_ros_imu.so">
-		<alwaysOn>true</alwaysOn>
-		<updateRate>50.0</updateRate> 
-		<bodyName>base_link</bodyName>
-		<topicName>imu/data</topicName>
-		<gaussianNoise>2.89e-08</gaussianNoise>
-	  </plugin>
-	</gazebo>
+        <link name="imu_link">
+           <inertial>
+                <mass value="1e-5" />
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+            </inertial>    
+        </link>
+        <joint name="imu_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="${M_PI/2} ${M_PI/2} 0" />
+            <parent link="base_link"/>
+            <child link="imu_link" />
+        </joint>
+
+        <gazebo>
+		  <plugin name="imu_controller" filename="libhector_gazebo_ros_imu.so">
+			<alwaysOn>true</alwaysOn>
+			<updateRate>50.0</updateRate> 
+			<bodyName>imu_link</bodyName>
+			<topicName>imu/data</topicName>
+            <accelDrift>0.005 0.005 0.005</accelDrift>
+            <accelGaussianNoise>0.005 0.005 0.005</accelGaussianNoise>
+            <rateDrift>0.005 0.005 0.005 </rateDrift>
+            <rateGaussianNoise>0.005 0.005 0.005 </rateGaussianNoise>
+            <headingDrift>0.005</headingDrift>
+            <headingGaussianNoise>0.005</headingGaussianNoise>
+		  </plugin>
+		</gazebo>
+        
 
         <!-- GPS -->
         <gazebo>
-            <plugin name="gps_controller" filename="libgazebo_ros_p3d.so">
-            <alwaysOn>true</alwaysOn>
-            <updateRate>30.0</updateRate>
-            <bodyName>base_link</bodyName>
-            <topicName>gps/fix</topicName>
-            <gaussianNoise>0.05</gaussianNoise>
+            <plugin name="gps_controller" filename="libhector_gazebo_ros_gps.so">
+                <updateRate>1</updateRate>
+                <robotNamespace>gps</robotNamespace>
+                <bodyName>base_link</bodyName>
+                <velocityTopicName>vo</velocityTopicName>
+                <referenceLatitude>32.7</referenceLatitude>
+                <referenceLongitude>35.02</referenceLongitude>
+                <drift>0.0001 0.0001 0.0001</drift>
             </plugin>
         </gazebo>
-        
+                
         <!-- Arm Lidar -->
         <xacro:sensor_hokuyo parent="arm_gripper" name="hokuyo">
-            <origin xyz="-0.06 0 0.105" rpy="0 0 0"/>
+            <origin xyz="-0.06 0 0.105" rpy="0 -0.001 0"/>
         </xacro:sensor_hokuyo>
 
         <!-- Arm Camera -->

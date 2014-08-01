@@ -148,7 +148,7 @@ void HuskyPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
   cmd_vel_sub_ = rosnode_->subscribe("/husky/cmd_vel_unsafe", 1, &HuskyPlugin::OnCmdVel, this );
   ptu_cmd_sub_ = rosnode_->subscribe("/ptu/cmd", 1, &HuskyPlugin::OnPtuCmd, this );
 
-  odom_pub_ = rosnode_->advertise<nav_msgs::Odometry>("odom", 1);
+  odom_pub_ = rosnode_->advertise<nav_msgs::Odometry>("encoder", 1);
 
   joint_state_pub_ = rosnode_->advertise<sensor_msgs::JointState>("joint_states", 1);
   
@@ -316,15 +316,13 @@ void HuskyPlugin::UpdateChild()
   odom.pose.pose.position.y = odom_pose_[1];
   odom.pose.pose.position.z = 0;
 
-  // This interface doesn't exist anymore
-  // TODO(akalmbach): test that this really still works
-  //btQuaternion qt;
-  //qt.setEuler(0,0,odom_pose_[2]);
+  tf::Quaternion qt;
+  qt.setRPY(0,0,odom_pose_[2]);
 
-  odom.pose.pose.orientation.x = odom_pose_[2];
-  odom.pose.pose.orientation.y = 0;
-  odom.pose.pose.orientation.z = 0;
-  odom.pose.pose.orientation.w = 1;
+  odom.pose.pose.orientation.x = qt.getX();
+  odom.pose.pose.orientation.y = qt.getY();
+  odom.pose.pose.orientation.z = qt.getZ();
+  odom.pose.pose.orientation.w = qt.getW();
 
   double pose_cov[36] = { 1e-3, 0, 0, 0, 0, 0,
                           0, 1e-3, 0, 0, 0, 0,
