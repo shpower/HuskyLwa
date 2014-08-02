@@ -56,7 +56,7 @@ class FalconSpacenavTeleop
             falcon_y_bias = 0;
             falcon_z_bias = 0;
 
-            joint_vel_pub = node_.advertise<brics_actuator::JointVelocities>("arm_controller/command_vel",1000);
+            joint_vel_pub = node_.advertise<brics_actuator::JointVelocities>("arm_controller/cmd_vel",1000);
             gripper_pub = node_.advertise<robotiq_s_model_control::SModel_robot_output>("SModelRobotOutput",1000);
 //            husky_vel_pub = node_.advertise<geometry_msgs::Twist>("/husky/cmd_vel",1000); //cannot operate husky at the same time
             falcon_force_pub = node_.advertise<rosfalcon::falconForces>("falcon/force_values",1000);

@@ -23,8 +23,33 @@ OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTE
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
+
+<!-- This is a urdf.xacro document. URDF the Universal Robot Description Format, an XML for describing robots that
+various ROS programs understand. For the full URDF reference, see http://wiki.ros.org/urdf. Xacro is an xml macro
+language. For the full xacro reference see http://wiki.ros.org/xacro.
+The xacro macros are expanded when the robot description is loaded onto the parameter server.
+
+This file is the main urdf.xacro file for the LWA Husky model. Many parts are described in other documents, but
+they are all described here.
+
+The main structure of a URDF file is to define bodies, called "links" and body connectors, called "joints". Links
+include inertial, visual, and collision elements. Joints specify an origin, a parent link, a child link, and a type, usually
+either fixed, continuos (rotational, no limits), or revolute (rotational with limits).
+
+When gazebo loads the model, it will also load the Gazebo reference tags. These provide information to different
+plugins, which provide the interface between the gazebo model and ROS. They are also where surface parameters such
+as wheel friction and colour can be defined. Note that the color which shows up in rviz is defined in the materials macro
+but the color which shows up in gazebo is defined separately in the gazebo reference tag.
+-->
+
+
 <robot xmlns:xacro="http://ros.org/wiki/xacro"
     name="lwa_husky" >
+
+    <!-- xacro:include tags.... specify an external urdf.xacro file to import.
+         note that the xacro supports roslaunch xml, so features like find to get the
+         path to a ros package, and param to load a value from the ros parameter server can
+         be used in your urdf -->
 
     <!-- utils-->
     <xacro:include filename="$(find tec_description)/urdf/utils/wheel.urdf.xacro" />
@@ -32,6 +57,11 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
     <xacro:include filename="$(find tec_description)/urdf/utils/parts.urdf.xacro" />
 
     <!-- sensors -->
+    <!-- Each of these sensor macros has a simple physical model, as well as a plugin, so that you can just
+         drop it in with a parent, an origin tag, and a name, and the appropriate topics will be published.
+         Note that the noise models have all been set extremely naively, and you might want to go and
+         increase the noise on some of these sensors to make the data more realistic.
+    -->
     <xacro:include filename="$(find tec_description)/urdf/components/kinect.urdf.xacro" />
     <xacro:include filename="$(find tec_description)/urdf/components/lms151.urdf.xacro" />
     <xacro:include filename="$(find tec_description)/urdf/components/firefly.urdf.xacro" />
@@ -45,7 +75,8 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
     <xacro:include filename="$(find tec_description)/urdf/components/d46.urdf.xacro" />
 
     <!-- PROPERTY LIST -->
-    <!--All units in m-kg-s-radians unit system -->
+    <!-- Units in m-kg-s-radians unit system. -->
+    <!-- xacro also lets you define properties, and refer to them later using "${property name}" -->
     <property name="M_PI" value="3.1415926535897931" />
 
     <!-- Main Body-base-->
@@ -93,9 +124,14 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
         <link name="base_link">
             <inertial>
                 <mass value="${base_mass}" />
-                <!--This is the pose of the inertial reference frame, relative to the link reference frame. The origin of the inertial reference frame needs to be at the center of gravity. The axes of the inertial reference frame do not need to be aligned with the principal axes of the inertia.-->
+                <!--This is the pose of the inertial reference frame, relative to the link reference frame.
+                    The origin of the inertial reference frame needs to be at the center of gravity.
+                    The axes of the inertial reference frame do not need to be aligned with the principal axes of the inertia.
+                -->
                 <origin xyz="${base_x_com} ${base_y_com} ${base_z_com}" />
-                <!--The 3x3 rotational inertia matrix. Because the rotational inertia matrix is symmetric, only 6 above-diagonal elements of this matrix are specified here, using the attributes ixx, ixy, ixz, iyy, iyz, izz.-->
+                <!--The 3x3 rotational inertia matrix. Because the rotational inertia matrix is symmetric, only 6
+                    above-diagonal elements of this matrix are specified here, using the attributes ixx, ixy, ixz, iyy, iyz, izz.
+                -->
                 <inertia ixx="${base_ixx_com_cs}" ixy="${base_ixy_com_cs}" ixz="${base_ixz_com_cs}"
                     iyy="${base_iyy_com_cs}" iyz="${base_iyz_com_cs}" izz="${base_izz_com_cs}" /> 
             </inertial>
@@ -122,16 +158,18 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
     <!-- /BASE-LINK -->
     
     <!-- WHEELS -->
-        <tec_wheel fb="back" lr="left" parent="base_link" translateX="-1" translateY="1" flipY="-1"/>
-        <tec_wheel fb="back" lr="right" parent="base_link" translateX="-1" translateY="-1" flipY="-1"/>
-        <tec_wheel fb="front" lr="left" parent="base_link" translateX="1" translateY="1" flipY="-1"/>
-        <tec_wheel fb="front" lr="right" parent="base_link" translateX="1" translateY="-1" flipY="-1"/>
+        <xacro:tec_wheel fb="back" lr="left" parent="base_link" translateX="-1" translateY="1" flipY="-1"/>
+        <xacro:tec_wheel fb="back" lr="right" parent="base_link" translateX="-1" translateY="-1" flipY="-1"/>
+        <xacro:tec_wheel fb="front" lr="left" parent="base_link" translateX="1" translateY="1" flipY="-1"/>
+        <xacro:tec_wheel fb="front" lr="right" parent="base_link" translateX="1" translateY="-1" flipY="-1"/>
     <!-- /WHEELS -->
     
     
     <!-- DECORATIONS -->
+        <!-- The tec_part macro is a general convenience macro to create a part with a non-null but negligeable
+             inertial frame. -->
         <!-- Top Plate -->
-        <tec_part parent="base_footprint" name="top_plate" visual="top_plate" collision="top_plate" 
+        <xacro:tec_part parent="base_footprint" name="top_plate" visual="top_plate" collision="top_plate" 
               colour="Yellow"
               translateX="0.0" translateY="0.0" translateZ="${wheel_x_size/2 - base_z_origin_to_wheel_origin}" 
               rotateX="0.0" rotateY="0.0" rotateZ="0.0"/>
@@ -140,7 +178,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
         </gazebo>
 
         <!-- User Rail -->
-        <tec_part parent="base_footprint" name="user_rail" visual="user_rail" collision="user_rail"
+        <xacro:tec_part parent="base_footprint" name="user_rail" visual="user_rail" collision="user_rail"
               colour="DarkGray"
               translateX="0.272" translateY="0.0" translateZ="${0.245 + wheel_x_size/2 - base_z_origin_to_wheel_origin}" 
               rotateX="0.0" rotateY="0.0" rotateZ="0.0"/>
@@ -149,14 +187,15 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
         </gazebo>
 
         <!-- Bumpers -->
-        <tec_part parent="base_footprint" name="front_bumper" visual="front_bumper" collision="front_bumper"
+        <xacro:tec_part parent="base_footprint" name="front_bumper" visual="front_bumper" collision="front_bumper"
               colour="DarkGray"
               translateX="0.530" translateY="0.0" translateZ="${0.091 + wheel_x_size/2 - base_z_origin_to_wheel_origin}" 
               rotateX="0.0" rotateY="0.0" rotateZ="0.0"/>
         <gazebo reference="base_footprint_front_bumper_part">
             <material>Gazebo/FlatBlack</material>
         </gazebo>
-        <tec_part parent="base_footprint" name="rear_bumper" visual="bumper" collision="bumper"
+        
+        <xacro:tec_part parent="base_footprint" name="rear_bumper" visual="bumper" collision="bumper"
               colour="DarkGray"
               translateX="-0.48" translateY="0.0" translateZ="${0.091 + wheel_x_size/2 - base_z_origin_to_wheel_origin}" 
               rotateX="0.0" rotateY="0.0" rotateZ="3.14"/>
@@ -167,8 +206,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
         
 
     <!-- ARM -->
-        <!-- Note that the plugins and sensors are started from gazebo reference tags
-             at the bottom of this file, after the entire model has been loaded -->
         <xacro:schunk_lwa name="arm" parent="base_link">
             <origin xyz="0.3 0 0.1" rpy="${M_PI} 0 0" />
         </xacro:schunk_lwa>
@@ -198,7 +235,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
         </xacro:sensor_kinect>
 
         <!-- Lidar Mounting Bracket -->
-        <tec_part parent="base_footprint_front_bumper_part" name="sick_bracket" visual="lidar_mount" collision="lidar_mount"
+        <xacro:tec_part parent="base_footprint_front_bumper_part" name="sick_bracket" visual="lidar_mount" collision="lidar_mount"
             colour="DarkGray"
             translateX="-0.12" translateY="0" translateZ="0" 
             rotateX="0" rotateY="0.0" rotateZ="0"/>
@@ -230,6 +267,11 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
             <child link="imu_link" />
         </joint>
 
+
+        <!-- Note that there are many sources of gazebo plugins, of varying quality. This includes the built in
+             plugins, which don't all work perfectly. The hector gazebo sensors package has some
+             very functional, if not always standard plugins.
+        -->
         <gazebo>
 		  <plugin name="imu_controller" filename="libhector_gazebo_ros_imu.so">
 			<alwaysOn>true</alwaysOn>
@@ -271,7 +313,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
     <!-- /MAST AND SENSORS -->
 
     <!-- CUSTOM PLUGINS -->
-        <!-- Base plugin -->
+        <!-- Base and PTU plugin -->
         <gazebo>
             <plugin name="tec_husky_gazebo_plugin" filename="libtec_husky_gazebo_plugin.so">
             <alwaysOn>true</alwaysOn>
@@ -288,7 +330,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
             </plugin>
         </gazebo>
         
-        <!-- Arm and PTU plugin -->
+        <!-- Arm plugin -->
         <xacro:schunk_lwa_gazebo name="arm" />
     <!-- CUSTOM PLUGINS -->
       

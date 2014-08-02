@@ -104,7 +104,7 @@ void LWAPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 
     rosnode_ = new ros::NodeHandle( node_namespace_ );
 
-    cmd_vel_sub_ = rosnode_->subscribe("command_vel", 1, &LWAPlugin::OnCmdVel, this );
+    cmd_vel_sub_ = rosnode_->subscribe("cmd_vel", 1, &LWAPlugin::OnCmdVel, this );
     joint_state_pub_ = rosnode_->advertise<sensor_msgs::JointState>("/joint_states", 1);
     opmode_pub_ = rosnode_->advertise<std_msgs::String>("current_operationmode", 1000);
     trajectory_state_pub_ = rosnode_->advertise<control_msgs::JointTrajectoryControllerState>("state", 1000);

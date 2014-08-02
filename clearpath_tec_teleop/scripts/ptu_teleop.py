@@ -33,9 +33,9 @@ class PTUTeleop:
     def __init__(self):
         rospy.init_node('ptu_teleop')
 
-        pan_lim = rospy.get_param('~pan_lim', 3.14)
-        tilt_hi_lim = rospy.get_param('~tilt_hi_lim', pi)
-        tilt_lo_lim = -rospy.get_param('~tilt_lo_lim', -pi)
+        pan_lim = rospy.get_param('~pan_lim', 2.775)
+        tilt_hi_lim = rospy.get_param('~tilt_hi_lim', 0.82)
+        tilt_lo_lim = -rospy.get_param('~tilt_lo_lim', -0.52)
         
         tilt_scale = rospy.get_param('~tilt_scale', 1)
         pan_scale = rospy.get_param('~pan_scale', 1)
